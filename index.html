@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Black Force 007 — আইনের খেলায় বুদ্ধির পরীক্ষা</title>
+
+<!-- OPTIONAL: Google font (Noto Sans Bengali). আপনি চাইলে নাম পরিবর্তন বা লিংক বাদ দিতে পারেন) -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bangla:wght@300;400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<!-- Firebase SDKs (optional — required only if আপনি Firebase Login/Leaderboard চালাবেন) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="logo">
+        <img src="logo.png" alt="Black Force 007" onerror="this.style.display='none'">
+        <div class="title">আইনের খেলায় বুদ্ধির পরীক্ষা</div>
+      </div>
+      <div class="top-actions">
+        <div id="user-email" class="user-email"></div>
+        <button id="logoutBtn" class="btn small hidden" onclick="logout()">লগ আউট</button>
+      </div>
+    </header>
+
+    <main class="stage">
+
+      <!-- LOGIN / SIGNUP -->
+      <section id="auth-panel" class="card">
+        <h2>লগইন / সাইন আপ</h2>
+        <p class="info">ইমেইল ও পাসওয়ার্ড দিয়ে অ্যাকাউন্ট করুন — (Firebase optional)</p>
+        <input id="email" type="email" placeholder="ই-মেইল" />
+        <input id="password" type="password" placeholder="পাসওয়ার্ড (৬+)" />
+        <div class="row">
+          <button id="signupBtn" class="btn" onclick="signup()">Sign Up</button>
+          <button id="loginBtn" class="btn outline" onclick="login()">Login</button>
+        </div>
+        <p id="auth-msg" class="msg"></p>
+        <p class="small">আপনি চাইলে গেস্ট হিসেবে খেলতে পারবেন — Login এ না কলেই চলবে (Local mode)।</p>
+        <div class="or">অথবা</div>
+        <button id="guestPlay" class="btn ghost" onclick="startAsGuest()">Guest Play</button>
+      </section>
+
+      <!-- GAME -->
+      <section id="game-panel" class="card hidden">
+        <div class="hud">
+          <div class="player">
+            <div class="label">খেলোয়াড়</div>
+            <div id="display-name" class="value">Guest</div>
+          </div>
+
+          <div class="meter">
+            <div class="label">স্কোর</div>
+            <div class="value"><span id="score">0</span> <small>পয়েন্ট</small></div>
+          </div>
+
+          <div class="timer-wrap">
+            <div class="label">টাইমার</div>
+            <div id="timer" class="timer">20</div>
+          </div>
+        </div>
+
+        <div id="card-question" class="question-card">
+          <div id="question-no" class="qno">প্রশ্ন <span id="q-index">1</span>/ <span id="q-total">30</span></div>
+          <div id="question-text" class="question-text">প্রশ্ন এখানে দেখা যাবে</div>
+        </div>
+
+        <div id="options" class="options-grid">
+          <!-- option buttons inserted dynamically -->
+        </div>
+
+        <div class="controls">
+          <button id="nextBtn" class="btn outline hidden" onclick="onNext()">Next</button>
+          <button id="replayBtn" class="btn hidden" onclick="replay()">Play Again</button>
+        </div>
+
+        <div class="bottom-row">
+          <div class="coins">কয়েন: <span id="coins">0</span> 💰</div>
+          <div class="stats small">সঠিক: <span id="correct-count">0</span> | ভুল: <span id="wrong-count">0</span></div>
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section id="result-panel" class="card hidden">
+        <h2>ফলাফল</h2>
+        <div class="result-box">
+          <p>খেলোয়াড়: <strong id="res-name"></strong></p>
+          <p>সঠিক: <strong id="res-correct">0</strong></p>
+          <p>ভুল: <strong id="res-wrong">0</strong></p>
+          <p>মোট স্কোর: <strong id="res-score">0</strong></p>
+          <p>Best (Local): <strong id="best-score">0</strong></p>
+        </div>
+        <div class="row">
+          <button class="btn" onclick="replay()">Play Again</button>
+          <button class="btn outline" onclick="goHome()">Home</button>
+        </div>
+      </section>
+
+      <!-- LEADERBOARD -->
+      <section class="card leaderboard-card">
+        <h3>Leaderboard</h3>
+        <ul id="leaderboard-list" class="leaderboard-list">
+          <li class="muted">No scores yet</li>
+        </ul>
+      </section>
+
+    </main>
+
+    <audio id="snd-click" src="sounds/click.mp3" preload="auto"></audio>
+    <audio id="snd-correct" src="sounds/correct.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
+
+    <footer class="footer">
+      <small>Black Force 007 • Quiz Engine • Built with HTML/CSS/JS</small>
+    </footer>
+  </div>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
