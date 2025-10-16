@@ -1,5 +1,5 @@
 /**********************************************************************
- script.js — Black Force 007 Quiz Engine (ready-to-use, updated)
+ script.js — Black Force 007 Quiz Engine (ready-to-use, updated Live Leaderboard)
 **********************************************************************/
 
 /* ---------- CONFIG ---------- */
@@ -24,7 +24,7 @@ if(FIREBASE_CONFIG){
 /* ---------- GLOBALS ---------- */
 const TOTAL_QUESTIONS = 30;
 const TIME_PER_Q = 20;
-const COLORS = ["#ff6b35","#ffd54a","#6bcB77","#4dabf7","#a55eea"]; // 5 colors
+const COLORS = ["#ff6b35","#ffd54a","#6bcB77","#4dabf7","#a55eea"]; 
 
 let pool = [];
 let currentIndex = 0;
@@ -240,54 +240,40 @@ function finishGame(){
   document.getElementById('res-score').innerText = score;
   const prevBest = parseInt(localStorage.getItem(bestLocalKey) || '0',10);
   if(score>prevBest) localStorage.setItem(bestLocalKey,score);
-  document.getElementById('best-score').innerText = Math.max(score,prevBest);
+  document.getElementById('best-score').innerText = Math.max(score, prevBest);
   gamePanel.classList.add('hidden');
   resultPanel.classList.remove('hidden');
   replayBtn.classList.remove('hidden');
 
   if(firebaseEnabled && player.uid){
-    const db = firebase.database();
-    db.ref('leaderboard/'+player.uid).set({
+    firebase.database().ref('leaderboard/'+player.uid).set({
       name: player.name,
       score: score,
       coins: coins,
       correct: correctCount,
       wrong: wrongCount,
       ts: Date.now()
-    }).catch(()=>{});
+    }).then(loadLeaderboard).catch(()=>{});
+  } else {
+    loadLeaderboard();
   }
 }
 
 /* ---------- LEADERBOARD ---------- */
 function loadLeaderboard(){
   if(firebaseEnabled){
+    // Order by score descending, limit top 10
     firebase.database().ref('leaderboard').orderByChild('score').limitToLast(10).on('value', snap=>{
       const arr=[];
       snap.forEach(c=>arr.push(c.val()));
-      arr.reverse();
+      // sort descending
+      arr.sort((a,b)=>b.score - a.score);
       renderLeaderboard(arr);
     });
-  }else{
+  } else {
     const localBest = parseInt(localStorage.getItem(bestLocalKey)||'0',10);
     renderLeaderboard([{name:'Local Best', score:localBest}]);
   }
 }
 
 function renderLeaderboard(arr){
-  leaderboardList.innerHTML='';
-  if(!arr || arr.length===0){ leaderboardList.innerHTML='<li class="muted">No scores yet</li>'; return; }
-  arr.forEach((p,i)=>{
-    const li=document.createElement('li');
-    li.innerText=`${i+1}. ${p.name} — ${p.score || 0} 💰`;
-    leaderboardList.appendChild(li);
-  });
-}
-
-/* ---------- INIT ---------- */
-(function init(){
-  document.getElementById('guestPlay').addEventListener('click', startAsGuest);
-  nextBtn.addEventListener('click', onNext);
-  replayBtn.addEventListener('click', replay);
-  qTotalEl.innerText = TOTAL_QUESTIONS;
-  loadLeaderboard();
-})();
